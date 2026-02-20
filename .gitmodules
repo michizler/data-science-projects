@@ -1,3 +1,12 @@
 [submodule "imf-globaleconomy-analytics"]
 	path = imf-globaleconomy-analytics
 	url = https://github.com/michizler/imf-globaleconomy-analytics.git
+[submodule "usb-stock-timeseries-model"]
+	path = usb-stock-timeseries-model
+	url = https://github.com/michizler/usb-stock-timeseries-model.git
+[submodule "reder-analytics"]
+	path = reder-analytics
+	url = https://github.com/michizler/reder-analytics.git
+[submodule "strataforge-prediction"]
+	path = strataforge-prediction
+	url = https://github.com/michizler/strataforge-prediction.git
