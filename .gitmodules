@@ -1,0 +1,3 @@
+[submodule "imf-globaleconomy-analytics"]
+	path = imf-globaleconomy-analytics
+	url = https://github.com/michizler/imf-globaleconomy-analytics.git
