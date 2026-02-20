@@ -89,7 +89,7 @@ Custom measures for each indicator (card callout + sparkline pairs), a `DATATABL
 
 </details>
 
-📂 **[View Project →](imf-globaleconomy-analytics/)**
+📂 **[View Project →](https://github.com/michizler/imf-globaleconomy-analytics/)**
 
 ---
 
@@ -167,7 +167,7 @@ concrete_strength = 23.914
 
 </details>
 
-📂 **[View Project →](strataforge-prediction/)**
+📂 **[View Project →](https://github.com/michizler/strataforge-prediction/)**
 
 ---
 
@@ -261,7 +261,7 @@ Best hyperparameters: `criterion='log_loss'`, `splitter='random'`, `max_depth=30
 
 </details>
 
-📂 **[View Project →](reder-analytics/)**
+📂 **[View Project →](https://github.com/michizler/reder-analytics/)**
 
 ---
 
@@ -334,7 +334,7 @@ Unlike Holt-Winters and ARIMA, the GARCH model also provides a **volatility fore
 
 </details>
 
-📂 **[View Project →](usb-stock-timeseries-model/)**
+📂 **[View Project →](https://github.com/michizler/usb-stock-timeseries-model/)**
 
 ---
 
