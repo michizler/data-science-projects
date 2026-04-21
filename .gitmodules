@@ -10,3 +10,6 @@
 [submodule "strataforge-prediction"]
 	path = strataforge-prediction
 	url = https://github.com/michizler/strataforge-prediction.git
+[submodule "voyage-rails-analytics"]
+	path = voyage-rails-analytics
+	url = https://github.com/michizler/voyage-rails-analytics
