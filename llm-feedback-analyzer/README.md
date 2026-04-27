@@ -33,7 +33,7 @@ Useful as a building block for: customer-feedback dashboards, churn-risk pipelin
 pip install -r requirements.txt
 
 # 2. Add your API key
-cp .env.example .env
+touch .env
 # then edit .env and add your ANTHROPIC_API_KEY
 
 # 3. Classify a single review
