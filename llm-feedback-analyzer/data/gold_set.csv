@@ -1,0 +1,16 @@
+review,sentiment,churn_risk
+"Absolutely love this service - the recipes have been fantastic and customer support is top-tier. Will keep subscribing for years.",positive,low
+"Cancelling my subscription. Three weeks in a row the box arrived late and customer service didn't even apologise. Done with this.",negative,high
+"It's fine I guess. The food is okay but I can find similar quality elsewhere for cheaper.",neutral,medium
+"Best decision I made this year. The variety, the freshness, the convenience - 10/10.",positive,low
+"Quality has dropped noticeably over the last few months. If this continues I'll be looking for an alternative.",negative,high
+"Decent product, decent price. Nothing to write home about but I'm not unhappy.",neutral,medium
+"Outstanding! Recommended this to all my friends. Keep up the great work.",positive,low
+"App keeps crashing, deliveries are unreliable, and the new menu is awful. Why am I still paying for this?",negative,high
+"I like the meals but portion sizes have shrunk while prices went up. Not sure how much longer I'll stay.",neutral,medium
+"Worth every penny. The recipes are creative, ingredients are always fresh.",positive,low
+"Just discovered a competitor with better pricing - probably switching next month.",negative,high
+"Some weeks are great, others are forgettable. Inconsistent.",neutral,medium
+"Five years a customer and still impressed. They keep innovating.",positive,low
+"Tried to pause my subscription and they made it impossibly hard. Now I'm angry.",negative,high
+"Fine for now. Might explore alternatives in the new year.",neutral,medium
