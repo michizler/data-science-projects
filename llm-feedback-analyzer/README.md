@@ -74,7 +74,3 @@ This is a starting point, not a finished product. Natural next steps:
 - Python 3.10+
 - [`anthropic`](https://pypi.org/project/anthropic/) — Anthropic API client
 - [`pydantic`](https://pypi.org/project/pydantic/) — schema validation
-
-## License
-
-MIT.
