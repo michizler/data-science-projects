@@ -10,14 +10,16 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white)]()
 [![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)]()
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)]()
+[![Anthropic](https://img.shields.io/badge/Anthropic-D97757?style=flat-square&logo=anthropic&logoColor=white)]()
+[![Pydantic](https://img.shields.io/badge/Pydantic-E92063?style=flat-square&logo=pydantic&logoColor=white)]()
 
 ---
 
 ## About This Portfolio
 
-This repository brings together five end-to-end data science projects spanning different industries, techniques, and business problems. Each project follows a consistent approach: start with a real business question, explore and prepare the data rigorously, build and validate models against statistical standards, and translate the results into actionable recommendations with quantified impact.
+This repository brings together six end-to-end data science projects spanning different industries, techniques, and business problems. Each project follows a consistent approach: start with a real business question, explore and prepare the data rigorously, build and validate models against statistical standards, and translate the results into actionable recommendations with quantified impact.
 
-The work covers the full analytics spectrum — from interactive dashboards and hypothesis testing through regression modelling, time series forecasting, and machine learning classification deployed via REST APIs and containerised microservices.
+The work covers the full analytics spectrum — from interactive dashboards and hypothesis testing through regression modelling, time series forecasting, machine learning classification deployed via REST APIs and containerised microservices, and modern LLM workflows with schema-validated outputs.
 
 ### What You'll Find
 
@@ -28,6 +30,7 @@ The work covers the full analytics spectrum — from interactive dashboards and 
 | Telecommunications | Decision trees, RFM analysis, FastAPI deployment | Deployed churn prediction API                |
 | Finance            | Holt-Winters, ARIMA, ARIMA+GARCH                 | 365-day stock price forecast with volatility |
 | Transportation     | Gradient boosting, SHAP, MLflow, Docker Compose  | Dockerised dynamic pricing service           |
+| Customer Analytics / AI | LLMs, Pydantic schemas, retries, fallback handling, gold-set evaluation | Schema-validated LLM feedback classifier |
 
 ---
 
@@ -454,6 +457,75 @@ ROI projection: payback in 3–6 months at typical rail operator scale via incre
 
 ---
 
+### 6. 🤖 LLM Customer Feedback Analyzer — Schema-Validated AI Workflow
+
+**A production-shaped LLM workflow that turns unstructured customer feedback into typed, schema-validated JSON — demonstrating the engineering scaffolding around modern LLM systems.**
+
+<details>
+<summary><strong>📖 Expand Full Project Details</strong></summary>
+
+#### The Problem
+
+Every consumer business now sits on a pile of unstructured customer text — reviews, NPS comments, support tickets, cancellation reasons. The signal is real, but converting prose into reliable, structured data that downstream pipelines can trust is harder than it looks. Raw LLM calls return inconsistently-shaped outputs, occasionally invalid JSON, and failure modes shift with prompt and model. Without engineering scaffolding around the call, a single bad response can crash an entire pipeline.
+
+The question this project answers: _what does production-shaped LLM engineering actually look like in a focused, reviewable codebase?_
+
+#### What I Built
+
+A focused LLM workflow (~140 lines of core code) that classifies customer feedback into a strictly-typed schema, with the engineering patterns that turn a raw API call into something dependable.
+
+#### Engineering Patterns Demonstrated
+
+| Pattern                          | Implementation                                                                                                        |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| **Schema-constrained outputs**   | Pydantic `BaseModel` with enums (`Sentiment`, `ChurnRisk`) and bounded floats; LLM responses validated before any downstream use |
+| **Retry with exponential backoff** | Transient errors (rate limits, connection issues) retried with `base × 2^attempt` delay; 4xx errors bail fast        |
+| **Defensive parsing**            | Markdown code-fence stripping handles the common LLM failure mode of wrapping JSON in ```` ```json ... ``` ```` despite prompt instructions |
+| **Graceful fallback**            | When LLM repeatedly fails, returns a safe `neutral` / `medium` default with rationale — pipelines never crash on a single bad call |
+| **Evaluation harness**           | Hand-labelled gold set + evaluation script reporting per-field accuracy and surfacing error cases                     |
+
+#### Output Schema
+
+```json
+{
+  "sentiment": "negative",
+  "themes": ["delivery_speed", "support_quality"],
+  "churn_risk": "high",
+  "confidence": 0.92,
+  "rationale": "Customer explicitly states intent to cancel due to repeated late deliveries."
+}
+```
+
+Useful as a building block for: customer-feedback dashboards, churn-risk pipelines, support-ticket triage, and any analytics workflow needing reliable structured signal from prose.
+
+#### Evaluation Approach
+
+Rather than vibes-testing the model, I built a small labelled gold set (15 hand-labelled reviews covering positive/negative/neutral × low/medium/high churn risk) and an evaluation script reporting per-field accuracy with error analysis. This makes quality measurable rather than anecdotal, and provides the foundation for drift monitoring or A/B testing different models.
+
+| Metric              | Result            |
+| ------------------- | ----------------- |
+| Sentiment accuracy  | _[run evaluate.py]_ |
+| Churn-risk accuracy | _[run evaluate.py]_ |
+
+#### Possible Extensions
+
+- Expand gold set to 100+ examples covering sarcasm, mixed sentiment, multilingual cases
+- Add inter-annotator agreement (Cohen's kappa) as a dataset quality floor
+- A/B test models (Haiku vs Sonnet) on accuracy / cost / latency tradeoffs
+- Add observability — structured logging, latency histograms, per-failure-mode counters
+- Batch mode with concurrency control and progress reporting
+- Drift monitoring via scheduled re-evaluation against the gold set
+
+#### Tech Stack
+
+`Python 3.10+` · `Anthropic API (Claude Haiku 4.5)` · `Pydantic 2` · `python-dotenv`
+
+</details>
+
+📂 **[View Project →](https://github.com/michizler/llm-feedback-analyzer/)**
+
+---
+
 ## Skills & Tools
 
 ### Languages & Frameworks
@@ -466,6 +538,7 @@ ROI projection: payback in 3–6 months at typical rail operator scale via incre
 | **Frontend & Demos**      | React, Vite, Streamlit, Plotly, JavaScript/JSX                       |
 | **Containerisation**      | Docker, Docker Compose                                               |
 | **Dashboarding**          | Power BI (DAX, Power Query, Star Schema)                             |
+| **Generative AI / LLMs**  | Anthropic API (Claude), Pydantic schemas, structured outputs, prompt design |
 
 ### Techniques
 
@@ -480,6 +553,7 @@ ROI projection: payback in 3–6 months at typical rail operator scale via incre
 | **MLOps**               | MLflow experiment tracking, model registry, Dockerised deployment                                       |
 | **Data Preparation**    | JSON Normalisation, Outlier Analysis, Correlation Matrices                                              |
 | **Deployment**          | REST APIs, Model Serialisation (Pickle), Docker Compose, Cloud Cost Analysis (AWS/Azure/GCP)            |
+| **LLM Engineering**     | Schema-constrained outputs, retry/backoff, fallback handling, gold-set evaluation, drift awareness   |
 
 ---
 
@@ -529,6 +603,17 @@ data-science-projects/
 │   ├── docker-compose.yml               # Orchestrates both services
 │   ├── voyage-presentation/             # Interactive React slide deck
 │   └── report-documentation/            # Full project report (PDF)
+|
+├── llm-feedback-analyzer/              # LLM feedback classifier (Python)
+│   ├── classifier.py                    # Schema + LLM call + retries + fallback
+│   ├── demo.py                          # CLI for single classification
+│   ├── evaluate.py                      # Gold-set evaluation harness
+│   ├── data/
+│   │   └── gold_set.csv                 # 15 hand-labelled reviews
+│   ├── requirements.txt
+│   ├── .env.example
+│   └── .gitignore
+│
 │
 └── README.md                           # ← You are here
 ```
