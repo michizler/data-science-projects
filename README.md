@@ -1,6 +1,6 @@
 # Data Science & Analytics Portfolio
 
-**Turning complex data into decisions that matter — across finance, construction, telecommunications, transportation, and macroeconomics.**
+**Turning complex data into decisions that matter — across finance, construction, telecommunications, real estate, transportation, and macroeconomics.**
 
 [![R](https://img.shields.io/badge/R-276DC3?style=flat-square&logo=r&logoColor=white)]()
 [![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)]()
@@ -17,7 +17,7 @@
 
 ## About This Portfolio
 
-This repository brings together six end-to-end data science projects spanning different industries, techniques, and business problems. Each project follows a consistent approach: start with a real business question, explore and prepare the data rigorously, build and validate models against statistical standards, and translate the results into actionable recommendations with quantified impact.
+This repository brings together seven end-to-end data science projects spanning different industries, techniques, and business problems. Each project follows a consistent approach: start with a real business question, explore and prepare the data rigorously, build and validate models against statistical standards, and translate the results into actionable recommendations with quantified impact.
 
 The work covers the full analytics spectrum — from interactive dashboards and hypothesis testing through regression modelling, time series forecasting, machine learning classification deployed via REST APIs and containerised microservices, and modern LLM workflows with schema-validated outputs.
 
@@ -31,6 +31,7 @@ The work covers the full analytics spectrum — from interactive dashboards and 
 | Finance            | Holt-Winters, ARIMA, ARIMA+GARCH                 | 365-day stock price forecast with volatility |
 | Transportation     | Gradient boosting, SHAP, MLflow, Docker Compose  | Dockerised dynamic pricing service           |
 | Customer Analytics / AI | LLMs, Pydantic schemas, retries, fallback handling, gold-set evaluation | Schema-validated LLM feedback classifier |
+| Real Estate     | Gradient boosting, SHAP, Cross Validation, MLflow, Docker Compose, FastAPI deployment  | Dockerised dynamic property evaluation and similarity matching service |
 
 ---
 
@@ -526,6 +527,108 @@ Rather than vibes-testing the model, I built a small labelled gold set (15 hand-
 
 ---
 
+### 7. 🏘️ AlloyTower Centralised Data Platform — Property Valuation & Market Intelligence
+
+**A 3-week internship prototype delivering an automated valuation model (AVM), comparables search, and stakeholder-facing inference application — deployed end-to-end on a $0/month stack.**
+
+[![Streamlit](https://img.shields.io/badge/Try_Live_App-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://alloy-avm.streamlit.app/)
+[![API Docs](https://img.shields.io/badge/API_Docs-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://alloytower-avm-api.onrender.com/docs)
+[![Reflection Video](https://img.shields.io/badge/Reflection_Video-625DF5?style=for-the-badge&logo=loom&logoColor=white)](https://www.loom.com/share/4158cfcfc12c41a4b3bffc0ce2a10020)
+
+<details>
+<summary><strong>📖 Expand Full Project Details</strong></summary>
+
+#### The Problem
+
+AlloyTower required a Phase 1 data platform prototype: a property valuation engine, a comparables search to surface similar listings, an analyst-facing data explorer, and a Power BI integration — all built from a 2,090-row property dataset within a 3-week scope. The work needed to be honest about the dataset's limitations rather than over-promising on Phase 1 deliverables.
+
+#### What I Built
+
+A complete real estate intelligence prototype delivered as a deployed two-service application:
+
+1. **Data validation and cleaning** — surfaced 11 documented data quality findings, severity-ranked, and excluded compromised columns (latitude, longitude, zip_code were randomly generated in the source data) from modelling rather than letting them poison results
+2. **Two-model AVM strategy** — Model A uses assessed value when available; Model B excludes it for new builds and unassessed properties; the API auto-selects based on inputs
+3. **Explainability first** — SHAP TreeExplainer provides per-prediction feature contributions surfaced directly in the UI
+4. **Comparables search** — content-based property similarity for finding the closest matches in the dataset
+5. **Power BI export pipeline** — engineered features (assessment flag, median price per sqft by group) for stakeholder dashboarding
+6. **Deployed two-service architecture** — FastAPI backend on Render + Streamlit frontend on Streamlit Cloud, $0/month total
+
+#### The Two-Model Strategy
+
+| Model                     | Use case                                            | MAPE (5-fold CV) | R²              |
+| ------------------------- | --------------------------------------------------- | ---------------- | --------------- |
+| **A — Assessment-aware**  | Property has a recent county assessment             | **8.5% ± 1.0%**  | **0.97 ± 0.01** |
+| **B — Fundamentals-only** | New build, unassessed, or assessment unavailable    | **44.9% ± 2.8%** | 0.55 ± 0.04     |
+
+Model A is high-accuracy because `assessed_value` correlates 0.99 with `last_sale_price` in this dataset. Model B is the more honest test of what physical and locational features alone can predict, and the gap between the two is itself a finding — it shows precisely how much of Model A's accuracy is structural rather than learned.
+
+#### Honest Limitations as a Deliverable
+
+Rather than glossing over dataset weaknesses, I documented them as a first-class output:
+
+| Finding                                                  | Decision                                       |
+| -------------------------------------------------------- | ---------------------------------------------- |
+| Latitude/longitude/zip_code randomly generated (3% match)| Excluded from all modelling and analytics      |
+| Sale dates do not reflect real market trends             | Built AVM as cross-sectional, no date features |
+| Physical attributes weak (sqft correlation 0.22 vs 0.6–0.8 typical) | Documented; location features dominate |
+| Small training set (1,956 rows post-cleaning)            | Tail cases flagged with wider uncertainty bands |
+
+These are dataset properties, not modelling errors — and surfacing them clearly gave stakeholders an accurate read on what the Phase 1 prototype could and could not be used for.
+
+#### Solution Architecture
+
+```mermaid
+flowchart TD
+    A["🖥️ Streamlit Frontend<br/><i>alloy-avm.streamlit.app</i><br/>Streamlit Cloud · Free tier"]
+    B["⚡ FastAPI Backend<br/><i>alloytower-avm-api.onrender.com</i><br/>Render · Free tier"]
+    C["📦 Model Bundles<br/>model_A.pkl · model_B.pkl<br/>Committed to repo"]
+
+    A -->|"HTTPS / JSON"| B
+    B -->|"loads at startup"| C
+
+    subgraph Frontend["Frontend"]
+        A
+    end
+    subgraph Backend["Backend"]
+        B
+    end
+    subgraph Storage["Storage"]
+        C
+    end
+
+    style A fill:#FF4B4B,stroke:#333,stroke-width:1px,color:#fff
+    style B fill:#009688,stroke:#333,stroke-width:1px,color:#fff
+    style C fill:#6C757D,stroke:#333,stroke-width:1px,color:#fff
+```
+
+#### Deliverables
+
+- Two trained AVM variants (model_A.pkl, model_B.pkl) with MLflow tracking
+- FastAPI inference service with auto-model-selection logic
+- Streamlit frontend with valuation form, comparables, and market explorer
+- Content-based property similarity module (`similar_properties.py`)
+- Power BI export pipeline with derived features
+- Project Scope & Proposal document
+- Data Quality Findings Report (11 ranked findings)
+- Power BI dashboard
+- Loom reflection video
+
+#### Tech Stack
+
+`Python` · `LightGBM` · `Scikit-learn` · `category-encoders` · `SHAP` · `MLflow` · `FastAPI` · `Pydantic v2` · `Uvicorn` · `Streamlit` · `Altair` · `Power BI` · `Docker` · `Render` · `Streamlit Cloud`
+
+#### Data
+
+| Source                  | Records                  | Variables  | Type                                |
+| ----------------------- | ------------------------ | ---------- | ----------------------------------- |
+| AlloyTower property feed | 2,090 raw → 1,956 clean | 28 columns | Mixed; 3 columns excluded (synthetic) |
+
+</details>
+
+📂 **[View Project →](https://github.com/michizler/alloy-tower-data-platform/)** · 🌐 **[Live App →](https://alloy-avm.streamlit.app/)**
+
+---
+
 ## Skills & Tools
 
 ### Languages & Frameworks
@@ -533,7 +636,7 @@ Rather than vibes-testing the model, I built a small labelled gold set (15 hand-
 | Category                  | Technologies                                                         |
 | ------------------------- | -------------------------------------------------------------------- |
 | **Statistical Computing** | R (ggplot2, dplyr, forecast, rugarch, car, caret, corrplot)          |
-| **Machine Learning**      | Python (Scikit-learn, XGBoost, SHAP, MLflow, Pandas, NumPy, Jupyter) |
+| **Machine Learning**      | Python (Scikit-learn, XGBoost, LightGBM, category-encoders, SHAP, MLflow, Pandas, NumPy, Jupyter) |
 | **API Development**       | FastAPI, Pydantic, Uvicorn                                           |
 | **Frontend & Demos**      | React, Vite, Streamlit, Plotly, JavaScript/JSX                       |
 | **Containerisation**      | Docker, Docker Compose                                               |
@@ -552,8 +655,9 @@ Rather than vibes-testing the model, I built a small labelled gold set (15 hand-
 | **Explainability**      | SHAP (global & per-prediction), feature importance, dependence plots                                    |
 | **MLOps**               | MLflow experiment tracking, model registry, Dockerised deployment                                       |
 | **Data Preparation**    | JSON Normalisation, Outlier Analysis, Correlation Matrices                                              |
-| **Deployment**          | REST APIs, Model Serialisation (Pickle), Docker Compose, Cloud Cost Analysis (AWS/Azure/GCP)            |
+| **Deployment**          | REST APIs, Model Serialisation (Pickle), Docker Compose, Render, Streamlit Cloud, Cloud Cost Analysis (AWS/Azure/GCP) |
 | **LLM Engineering**     | Schema-constrained outputs, retry/backoff, fallback handling, gold-set evaluation, drift awareness   |
+| **Similarity & Search** | Content-based recommendation, target encoding, weighted feature similarity                              |
 
 ---
 
@@ -604,6 +708,19 @@ data-science-projects/
 │   ├── voyage-presentation/             # Interactive React slide deck
 │   └── report-documentation/            # Full project report (PDF)
 |
+├── alloy-tower-data-platform/          # Property valuation AVM (Python + Docker) [submodule]
+│   ├── api/                             # FastAPI backend (deployed to Render)
+│   ├── app/                             # Streamlit frontend (deployed to Streamlit Cloud)
+│   ├── pages/                           # Streamlit auto-discovered analyst pages
+│   ├── model/models/                    # Trained models + cleaned dataset
+│   ├── source_data/                     # Raw property feed (2,090 rows)
+│   ├── eda/                             # Exploratory analysis notebook
+│   ├── train_avm.py                     # End-to-end training pipeline
+│   ├── similar_properties.py            # Content-based comparables search
+│   ├── build_powerbi_export.py          # Power BI export with derived features
+│   ├── Dockerfile                       # Render deployment config
+│   └── render.yaml                      # Render service definition
+│
 ├── llm-feedback-analyzer/              # LLM feedback classifier (Python)
 │   ├── classifier.py                    # Schema + LLM call + retries + fallback
 │   ├── demo.py                          # CLI for single classification
@@ -628,7 +745,7 @@ Each project follows the same disciplined approach, regardless of domain:
 
 **2. Let the data dictate the method.** The USB project is the clearest example: Holt-Winters and ARIMA both failed because the data exhibited volatility clustering. Rather than forcing a method, the iterative diagnostic process revealed _why_ it failed and _what_ was needed — leading to GARCH as a principled solution, not an arbitrary choice.
 
-**3. Validate rigorously.** No model is presented without diagnostic evidence. The concrete regression passed all five classical assumptions (linearity, independence, normality, homoscedasticity, no multicollinearity). The GARCH model passed the Ljung-Box test where two predecessors failed. The churn classifier was evaluated on precision, recall, F1, and accuracy. The VoyageRail pricing model is tracked through MLflow and explained via SHAP for every prediction. Trust is earned through evidence.
+**3. Validate rigorously.** No model is presented without diagnostic evidence. The concrete regression passed all five classical assumptions (linearity, independence, normality, homoscedasticity, no multicollinearity). The GARCH model passed the Ljung-Box test where two predecessors failed. The churn classifier was evaluated on precision, recall, F1, and accuracy. The VoyageRail pricing model is tracked through MLflow and explained via SHAP for every prediction. The AlloyTower AVM was delivered with a documented data quality findings report ranking eleven dataset issues by severity, and a deliberate two-model strategy that exposes how much accuracy comes from `assessed_value` rather than learned valuation insight. Trust is earned through evidence.
 
 **4. Quantify the impact.** Results are translated into the language the business cares about. Not just "R² = 81.35%" but "£21,600 saved per project." Not just "97% accuracy" but "5–7x cheaper than acquiring a new customer." Not just "p = 0.2369" but "this is the only model whose residuals are indistinguishable from white noise." Not just "predicted £37.30" but a defensible narrative explaining _why_ that price.
 
