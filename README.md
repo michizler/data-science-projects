@@ -717,7 +717,7 @@ data-science-projects/
 │   ├── eda/                             # Exploratory analysis notebook
 │   ├── train_avm.py                     # End-to-end training pipeline
 │   ├── similar_properties.py            # Content-based comparables search
-│   ├── build_powerbi_export.py          # Power BI export with derived features
+│   ├── export_for_powerbi.py          # Power BI export with derived features
 │   ├── Dockerfile                       # Render deployment config
 │   └── render.yaml                      # Render service definition
 │
