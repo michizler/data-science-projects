@@ -626,6 +626,8 @@ flowchart TD
 
 📂 **[View Project →](https://github.com/michizler/alloy-tower-data-platform/)** · 🌐 **[Live App →](https://alloy-avm.streamlit.app/)**
 
+_Note: When loading the live app, wait 30-50 seconds and reload the app again if you experience a backend port error. This allows the api to spin up since its free tier._
+
 ---
 
 ## Skills & Tools
