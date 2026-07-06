@@ -523,7 +523,7 @@ Rather than vibes-testing the model, I built a small labelled gold set (15 hand-
 
 </details>
 
-📂 **[View Project →](https://github.com/michizler/llm-feedback-analyzer/)**
+📂 **[View Project →](https://github.com/michizler/data-science-projects/tree/master/llm-feedback-analyzer)**
 
 ---
 
@@ -665,7 +665,7 @@ Play-hours are textbook implicit feedback — yet **explicit-mode ALS beat impli
 
 </details>
 
-📂 **[View Project →](https://github.com/michizler/databricks-bigdata-analytics/)**
+📂 **[View Project →](https://github.com/michizler/data-science-projects/tree/master/databricks-bigdata-analytics)**
 
 ---
 
