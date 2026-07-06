@@ -16,7 +16,7 @@
 
 ## About This Portfolio
 
-This repository brings together seven end-to-end data science projects spanning different industries, techniques, and business problems. Each project follows a consistent approach: start with a real business question, explore and prepare the data rigorously, build and validate models against statistical standards, and translate the results into actionable recommendations with quantified impact.
+This repository brings together eight end-to-end data science projects spanning different industries, techniques, and business problems. Each project follows a consistent approach: start with a real business question, explore and prepare the data rigorously, build and validate models against statistical standards, and translate the results into actionable recommendations with quantified impact.
 
 The work covers the full analytics spectrum — from interactive dashboards and hypothesis testing through regression modelling, time series forecasting, machine learning classification deployed via REST APIs and containerised microservices, and modern LLM workflows with schema-validated outputs.
 
@@ -31,6 +31,7 @@ The work covers the full analytics spectrum — from interactive dashboards and 
 | Transportation     | Gradient boosting, SHAP, MLflow, Docker Compose  | Dockerised dynamic pricing service           |
 | Customer Analytics / AI | LLMs, Pydantic schemas, retries, fallback handling, gold-set evaluation | Schema-validated LLM feedback classifier |
 | Real Estate     | Gradient boosting, SHAP, Cross Validation, MLflow, Docker Compose, FastAPI deployment  | Dockerised dynamic property evaluation and similarity matching service |
+| Big Data / Lakehouse | Spark SQL, MLlib ALS, MLflow, Unity Catalog | Distributed analytics + scalable recommender on Databricks |
 
 ---
 
@@ -630,6 +631,44 @@ _Note: When loading the live app, wait 30-50 seconds and reload the app again if
 
 ---
 
+### 8. ⚡ Big Data Analytics on Databricks — Distributed SQL & Scalable Recommenders
+
+**Two Big Data workloads on the Databricks Lakehouse: Spark SQL analytics over 573,000 clinical trial records, and an MLflow-tracked ALS recommender trained on 200,000 Steam user–game interactions (99.8% matrix sparsity).**
+
+<details>
+<summary><strong>📖 Expand Full Project Details</strong></summary>
+
+#### The Problem
+
+Two questions that only distributed compute answers comfortably: _what does three decades of US clinical research look like across 570K+ registry records?_ — and — _which games should each of 12,393 Steam users see next, when 46% of them have only ever played one game?_
+
+#### What I Built
+
+**Workload 1 — Clinical Trials (Spark SQL):** Distributed SQL analysis on Databricks reading from Unity Catalog. Null auditing before analysis, `LATERAL VIEW EXPLODE` for pipe-delimited multi-valued conditions, data-quality guards against junk category values, and Spark-side aggregation before any `toPandas()` conversion. Findings: interventional + observational studies make up 99.5% of the registry, mean trial duration is 35.12 months (from 555K valid studies, 96.9% inclusion), and completed Alzheimer's trials grew from single digits in the 1990s to 60–95/year through 2009–2018.
+
+**Workload 2 — Steam Recommender (MLlib ALS + MLflow):** End-to-end recommender pipeline: EDA proving 45% of purchases are never played, log-transformed play-hours as the preference signal, `StringIndexer` ID engineering, an 18-run hyperparameter grid fully tracked in MLflow, and qualitative validation against real user play histories.
+
+#### The Interesting Finding
+
+Play-hours are textbook implicit feedback — yet **explicit-mode ALS beat implicit mode decisively (RMSE 1.4568 vs 2.3973)**, because the log transformation converts hours into a continuous scale explicit ALS can optimise directly. Under 99.8% sparsity, rank 10 also consistently beat rank 50 — extra latent dimensions modelled noise, not preference. The right modelling mode depends on how the signal is transformed, not just how it was collected.
+
+#### Tech Stack
+
+`Databricks` · `Unity Catalog` · `Apache Spark` · `Spark SQL` · `PySpark` · `MLlib (ALS)` · `MLflow` · `StringIndexer`
+
+#### Data
+
+| Source | Records | Shape |
+| --- | --- | --- |
+| ClinicalTrials.gov registry | 572,935 trials | 30 columns |
+| steam-200k (Kaggle) | 200,000 interactions | 12,393 users × 5,155 games |
+
+</details>
+
+📂 **[View Project →](https://github.com/michizler/databricks-bigdata-analytics/)**
+
+---
+
 ## Skills & Tools
 
 ### Languages & Frameworks
@@ -643,6 +682,7 @@ _Note: When loading the live app, wait 30-50 seconds and reload the app again if
 | **Containerisation**      | Docker, Docker Compose                                               |
 | **Dashboarding**          | Power BI (DAX, Power Query, Star Schema)                             |
 | **Generative AI / LLMs**  | Anthropic API (Claude), Pydantic schemas, structured outputs, prompt design |
+| **Big Data & Lakehouse**  | Databricks, Apache Spark, Spark SQL, PySpark, MLlib, Unity Catalog |
 
 ### Techniques
 
@@ -659,6 +699,7 @@ _Note: When loading the live app, wait 30-50 seconds and reload the app again if
 | **Deployment**          | REST APIs, Model Serialisation (Pickle), Docker Compose, Render, Streamlit Cloud, Cloud Cost Analysis (AWS/Azure/GCP) |
 | **LLM Engineering**     | Schema-constrained outputs, retry/backoff, fallback handling, gold-set evaluation, drift awareness   |
 | **Similarity & Search** | Content-based recommendation, target encoding, weighted feature similarity                              |
+| **Distributed Computing** | Spark SQL at scale, LATERAL VIEW EXPLODE, ALS collaborative filtering, implicit vs explicit feedback modelling, matrix sparsity analysis |
 
 ---
 
@@ -732,6 +773,11 @@ data-science-projects/
 │   ├── .env.example
 │   └── .gitignore
 │
+├── databricks-bigdata-analytics/       # Big Data on Databricks (Spark SQL + MLlib) [submodule]
+│   ├── notebooks/
+│   │   ├── 01-clinical-trials-spark-sql.ipynb
+│   │   └── 02-steam-als-recommender-mlflow.ipynb
+│   └── README.md
 │
 └── README.md                           # ← You are here
 ```
