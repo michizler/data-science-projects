@@ -564,7 +564,7 @@ A complete real estate intelligence prototype delivered as a deployed two-servic
 
 | Model                     | Use case                                            | MAPE (5-fold CV) | R²              |
 | ------------------------- | --------------------------------------------------- | ---------------- | --------------- |
-| **A — Assessment-aware**  | Property has a recent county assessment             | **8.5% ± 1.0%**  | **0.97 ± 0.01** |
+| **A — Assessment-aware**  | Property has a recent county assessment             | **8.0% ± 0.3%**  | **0.98 ± 0.00** |
 | **B — Fundamentals-only** | New build, unassessed, or assessment unavailable    | **44.9% ± 2.8%** | 0.55 ± 0.04     |
 
 Model A is high-accuracy because `assessed_value` correlates 0.99 with `last_sale_price` in this dataset. Model B is the more honest test of what physical and locational features alone can predict, and the gap between the two is itself a finding — it shows precisely how much of Model A's accuracy is structural rather than learned.
