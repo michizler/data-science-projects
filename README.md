@@ -137,7 +137,7 @@ concrete_strength = 23.914
 
 | Metric                       | Value                   |
 | ---------------------------- | ----------------------- |
-| R²                           | **81.35%**              |
+| Adjusted R²                  | **81.35%** (10-fold CV R² 0.80) |
 | All coefficients significant | p < 0.001               |
 | VIF (multicollinearity)      | All between 1.01 – 1.49 |
 | Assumptions passed           | 5 / 5                   |
@@ -164,7 +164,7 @@ concrete_strength = 23.914
 
 #### Deliverables
 
-- Multiple Linear Regression model (R² = 81.35%)
+- Multiple Linear Regression model (adjusted R² 81.35%, 10-fold cross-validated R² 0.80)
 - Logistic regression fly ash classifier (AIC = 145.12)
 - Three hypothesis tests (Kruskal-Wallis, Chi-Square)
 - Interactive React/Vite presentation with **live strength calculator**
@@ -370,8 +370,8 @@ Five core issues compounded the challenge: rule-based pricing unable to track re
 A full end-to-end dynamic pricing solution delivered as a **containerised microservices architecture**:
 
 1. **Data Pipeline** — cleaned and engineered 17 booking features including route characteristics, booking lead time, demand index, load factor, customer segment, and loyalty status
-2. **Model Training** — compared Linear Regression, Random Forest, Gradient Boosting, and XGBoost; selected the best performer via 5-fold CV on RMSE/MAE/R²
-3. **Explainability First** — SHAP values computed for every prediction, producing global feature importance and per-decision explanations that commercial teams can defend
+2. **Model Training** — compared Linear Regression, Random Forest and Gradient Boosting on a holdout split, with every run in MLflow. An October 2026 retrain removed four leaked features and switched to gradient boosting, with a holdout R² of 0.90 and a 5-fold CV R² of 0.903
+3. **Explainability First** — SHAP shows which features drive prices, and the retrained model returns SHAP contributions for every quote
 4. **Experiment Tracking** — MLflow logs every run's parameters, metrics, and artifacts to `mlflow.db`, enabling reproducibility and model governance
 5. **Two-Service Deployment** — FastAPI inference backend + Streamlit demo UI, orchestrated via Docker Compose
 
@@ -451,7 +451,7 @@ ROI projection: payback in 3–6 months at typical rail operator scale via incre
 
 #### Tech Stack
 
-`Python` · `Pandas` · `NumPy` · `Scikit-learn` · `XGBoost` · `SHAP` · `MLflow` · `FastAPI` · `Pydantic` · `Streamlit` · `Plotly` · `Docker` · `Docker Compose` · `React` · `Vite`
+`Python` · `Pandas` · `NumPy` · `Scikit-learn` · `SHAP` · `MLflow` · `FastAPI` · `Pydantic` · `Streamlit` · `Plotly` · `Docker` · `Docker Compose` · `React` · `Vite`
 
 #### Data
 
@@ -801,7 +801,7 @@ Each project follows the same disciplined approach, regardless of domain:
 
 **3. Validate rigorously.** No model is presented without diagnostic evidence. The concrete regression passed all five classical assumptions (linearity, independence, normality, homoscedasticity, no multicollinearity). The GARCH model passed the Ljung-Box test where two predecessors failed. The churn classifier was evaluated on precision, recall, F1, and accuracy. The VoyageRail pricing model is tracked through MLflow and explained via SHAP for every prediction. The AlloyTower AVM was delivered with a documented data quality findings report ranking eleven dataset issues by severity, and a deliberate two-model strategy that exposes how much accuracy comes from `assessed_value` rather than learned valuation insight. Trust is earned through evidence.
 
-**4. Quantify the impact.** Results are translated into the language the business cares about. Not just "R² = 81.35%" but "£21,600 saved per project." Not just "97% accuracy" but "5–7x cheaper than acquiring a new customer." Not just "p = 0.2369" but "this is the only model whose residuals are indistinguishable from white noise." Not just "predicted £37.30" but a defensible narrative explaining _why_ that price.
+**4. Quantify the impact.** Results are translated into the language the business cares about. Not just "adjusted R² = 81.35%" but "£21,600 saved per project." Not just "97% accuracy" but "5–7x cheaper than acquiring a new customer." Not just "p = 0.2369" but "this is the only model whose residuals are indistinguishable from white noise." Not just "predicted £37.30" but a defensible narrative explaining _why_ that price.
 
 **5. Make it accessible.** Every project includes an interactive React/Vite presentation that communicates the full analysis to non-technical stakeholders — complete with live calculators, model comparisons, worked cost examples, and (for VoyageRail) a full project budget breakdown.
 
