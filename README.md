@@ -354,38 +354,40 @@ Unlike Holt-Winters and ARIMA, the GARCH model also provides a **volatility fore
 
 ### 5. 🚆 Dynamic Ticket Pricing & Revenue Management — VoyageRail Ltd.
 
-**An explainable machine learning framework for demand forecasting and price optimisation in the rail travel sector — containerised and served through a FastAPI + Streamlit stack.**
+**An explainable fare model for a rail operator, served through FastAPI and a Streamlit fare desk in Docker.**
 
 <details>
 <summary><strong>📖 Expand Full Project Details</strong></summary>
 
 #### The Problem
 
-VoyageRail Ltd., a regional rail operator, had seen post-pandemic demand recover — but **revenue per seat had not kept pace**. Ticket volumes were stable, yet yield varied significantly across routes and travel windows, particularly during peak and near-peak periods. Static fare rules written a decade ago no longer responded to how modern travellers book.
+VoyageRail Ltd., a regional rail operator, had seen post-pandemic demand recover, but **revenue per seat had not kept pace**. Ticket volumes were stable, yet yield varied significantly across routes and travel windows, particularly during peak and near-peak periods. Static fare rules written a decade ago no longer responded to how modern travellers book.
 
-Five core issues compounded the challenge: rule-based pricing unable to track real-time demand, revenue leakage from underpriced high-demand seats and overpriced low-demand ones, no segmentation-aware personalisation, operational complexity across multiple routes and classes, and — most critically — previous analytical models offered limited transparency, making it difficult for commercial teams to trust or act on their recommendations.
+Five core issues compounded the challenge: rule-based pricing unable to track real-time demand, revenue leakage from underpriced high-demand seats and overpriced low-demand ones, no segmentation-aware personalisation, operational complexity across multiple routes and classes, and above all, earlier models that commercial teams could not explain, trust or act on.
 
 #### What I Built
 
-A full end-to-end dynamic pricing solution delivered as a **containerised microservices architecture**:
+A fare model that quotes from what a booking desk knows at quote time, delivered as two containerised services.
 
-1. **Data Pipeline** — cleaned and engineered 17 booking features including route characteristics, booking lead time, demand index, load factor, customer segment, and loyalty status
-2. **Model Training** — compared Linear Regression, Random Forest and Gradient Boosting on a holdout split, with every run in MLflow. An October 2026 retrain removed four leaked features and switched to gradient boosting, with a holdout R² of 0.90 and a 5-fold CV R² of 0.903
-3. **Explainability First** — SHAP shows which features drive prices, and the retrained model returns SHAP contributions for every quote
-4. **Experiment Tracking** — MLflow logs every run's parameters, metrics, and artifacts to `mlflow.db`, enabling reproducibility and model governance
-5. **Two-Service Deployment** — FastAPI inference backend + Streamlit demo UI, orchestrated via Docker Compose
+1. **Feature Audit.** Before modelling, I checked which columns a fare desk would know when it quotes. Five give the fare away or are only known after the train has left, so the model uses the other 13 features. These cover route, seat class, channel, lead time, demand forecast, customer segment and loyalty tier.
+2. **Model Training.** I compared linear regression, random forest and gradient boosting on one holdout split. Gradient boosting won with a holdout R² of 0.903, an average error of £6.53 and a 5-fold CV R² of 0.903. The linear baseline scores 0.713.
+3. **Explainability First.** The fare API returns SHAP contributions in pounds for every quote, so each price can be explained.
+4. **Experiment Tracking.** `train.py` logs every run's parameters, metrics and models to MLflow.
+5. **Two-Service Deployment.** A FastAPI fare service and a Streamlit fare desk, run together with Docker Compose.
 
 #### Top SHAP Features
 
-| Rank | Feature              | Relative Importance |
-| ---- | -------------------- | ------------------- |
-| 1    | `demand_index`       | Highest             |
-| 2    | `load_factor`        | Very High           |
-| 3    | `days_before_travel` | High                |
-| 4    | `seat_class`         | Moderate–High       |
-| 5    | `route_category`     | Moderate            |
+Average SHAP effect in pounds, across 5,000 holdout bookings.
 
-Demand signals dominate the pricing decision; customer and booking context refine it.
+| Rank | Feature              | Average effect |
+| ---- | -------------------- | -------------- |
+| 1    | `distance_km`        | £16.08         |
+| 2    | `days_before_travel` | £10.18         |
+| 3    | `seat_class`         | £7.55          |
+| 4    | `demand_index`       | £3.98          |
+| 5    | `total_seats`        | £2.05          |
+
+Distance, lead time and seat class set most of the fare. The demand forecast adjusts it.
 
 #### Solution Architecture
 
@@ -402,24 +404,24 @@ Demand signals dominate the pricing decision; customer and booking context refin
 │                                     │                  │
 │                                     ▼                  │
 │                           ┌──────────────────┐         │
-│                           │   model.pkl +    │         │
-│                           │   MLflow runs    │         │
+│                           │  model.joblib +  │         │
+│                           │ linear baseline  │         │
 │                           └──────────────────┘         │
 └────────────────────────────────────────────────────────┘
 ```
 
 #### Example Prediction
 
-For a Leeds → York, Standard class, 21 days before travel booking with demand index 0.92:
+A Manchester to London Standard booking, made 21 days before travel by a leisure customer on mobile, with a demand forecast of 0.92.
 
-| Metric                     | Value    |
-| -------------------------- | -------- |
-| **Predicted Ticket Price** | £37.30   |
-| **Demand Index**           | 0.92     |
-| **Days Before Travel**     | 21       |
-| **Estimated Fare Band**    | Moderate |
+| Metric                 | Value    |
+| ---------------------- | -------- |
+| **Quoted fare**        | £52.83   |
+| **Linear baseline**    | £51.60   |
+| **Fare band**          | Moderate |
+| **Biggest driver**     | 21 days of lead time, adding £14.77 |
 
-Streamlit surfaces three result views: **Insight View** (with fare band and comparative chart), **API Response** (raw JSON), and **cURL** (exportable for testing outside the UI).
+The fare desk shows four tabs. These are the price curve across the booking window, the SHAP drivers, the raw API response and a cURL command.
 
 #### Cloud Cost Analysis (Containerised Stack)
 
@@ -441,23 +443,23 @@ ROI projection: payback in 3–6 months at typical rail operator scale via incre
 
 #### Deliverables
 
-- Trained regression model (model.pkl) with SHAP explainability
+- Gradient boosting fare model (model.joblib) with SHAP drivers for every quote, plus a linear baseline
 - FastAPI inference endpoint with Pydantic validation
 - Streamlit interactive demo for stakeholders
 - Docker Compose orchestration (2 services)
-- MLflow experiment tracking (SQLite backend)
+- `train.py`, which retrains both models and logs each run to MLflow
 - Interactive React/Vite presentation (23 slides)
 - Full project budget breakdown
 
 #### Tech Stack
 
-`Python` · `Pandas` · `NumPy` · `Scikit-learn` · `SHAP` · `MLflow` · `FastAPI` · `Pydantic` · `Streamlit` · `Plotly` · `Docker` · `Docker Compose` · `React` · `Vite`
+`Python` · `Pandas` · `NumPy` · `Scikit-learn` · `SHAP` · `MLflow` · `FastAPI` · `Pydantic` · `Streamlit` · `Docker` · `Docker Compose` · `React` · `Vite`
 
 #### Data
 
 | Source                    | Records             | Variables                                              | Target                      |
 | ------------------------- | ------------------- | ------------------------------------------------------ | --------------------------- |
-| VoyageRail booking system | Historical bookings | 17 features (route, timing, pricing, demand, customer) | `ticket_price` (regression) |
+| Synthetic booking data    | 519,713 bookings    | 13 quote-time features (route, timing, demand, customer) | `ticket_price_gbp` (regression) |
 
 </details>
 
@@ -745,17 +747,17 @@ data-science-projects/
 │   └── report-documentation/            # Full project report (PDF)
 │
 ├── voyage-rails-analytics/             # Rail dynamic pricing (Python + Docker)
-│   ├── preprocessing/                   # EDA, feature engineering, SHAP analysis
-│   │   ├── preprocess.ipynb             # Training pipeline notebook
-│   │   └── mlruns/                      # MLflow experiment tracking
-│   ├── source-data/                     # Historical booking records
-│   ├── app.py                           # FastAPI inference service
-│   ├── streamlit_app.py                 # Streamlit demo UI
+│   ├── preprocessing/                   # EDA, cleaning and the feature audit
+│   │   └── preprocess.ipynb
+│   ├── source-data/                     # Synthetic booking records
+│   ├── train.py                         # Trains the models, logs to MLflow
+│   ├── models/                          # Shipped model, baseline and model card
+│   ├── app.py                           # FastAPI fare service
+│   ├── streamlit_app.py                 # Streamlit fare desk
 │   ├── Dockerfile.backend               # FastAPI container image
 │   ├── Dockerfile.streamlit             # Streamlit container image
 │   ├── docker-compose.yml               # Orchestrates both services
-│   ├── voyage-presentation/             # Interactive React slide deck
-│   └── report-documentation/            # Full project report (PDF)
+│   └── voyage-presentation/             # Interactive React slide deck
 |
 ├── alloy-tower-data-platform/          # Property valuation AVM (Python + Docker) [submodule]
 │   ├── api/                             # FastAPI backend (deployed to Render)
@@ -801,7 +803,7 @@ Each project follows the same disciplined approach, regardless of domain:
 
 **3. Validate rigorously.** No model is presented without diagnostic evidence. The concrete regression passed all five classical assumptions (linearity, independence, normality, homoscedasticity, no multicollinearity). The GARCH model passed the Ljung-Box test where two predecessors failed. The churn classifier was evaluated on precision, recall, F1, and accuracy. The VoyageRail pricing model is tracked through MLflow and explained via SHAP for every prediction. The AlloyTower AVM was delivered with a documented data quality findings report ranking eleven dataset issues by severity, and a deliberate two-model strategy that exposes how much accuracy comes from `assessed_value` rather than learned valuation insight. Trust is earned through evidence.
 
-**4. Quantify the impact.** Results are translated into the language the business cares about. Not just "adjusted R² = 81.35%" but "£21,600 saved per project." Not just "97% accuracy" but "5–7x cheaper than acquiring a new customer." Not just "p = 0.2369" but "this is the only model whose residuals are indistinguishable from white noise." Not just "predicted £37.30" but a defensible narrative explaining _why_ that price.
+**4. Quantify the impact.** Results are translated into the language the business cares about. Not just "adjusted R² = 81.35%" but "£21,600 saved per project." Not just "97% accuracy" but "5–7x cheaper than acquiring a new customer." Not just "p = 0.2369" but "this is the only model whose residuals are indistinguishable from white noise." Not just "quoted £52.83" but the pounds each feature added or took away to reach that price.
 
 **5. Make it accessible.** Every project includes an interactive React/Vite presentation that communicates the full analysis to non-technical stakeholders — complete with live calculators, model comparisons, worked cost examples, and (for VoyageRail) a full project budget breakdown.
 
