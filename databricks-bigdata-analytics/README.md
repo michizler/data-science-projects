@@ -53,8 +53,8 @@ A Spark SQL analysis on Databricks, reading from **Unity Catalog** volumes, mixi
 
 - **Interventional + observational studies account for over 99.5%** of the registry
 - **"Healthy" is the most-studied condition** (10,873 trials) — a signature of Phase I safety trials recruiting healthy volunteers — followed by breast cancer (8,511) and prostate cancer (4,306)
-- **Mean trial duration is 35.12 months** (~2 years 11 months), computed from 555,263 valid studies — a 96.9% inclusion rate after date-quality filtering
-- **Completed Alzheimer's trials grew from single digits in the 1990s to 60–95 per year through 2009–2018**, tracking the rise of amyloid-targeting research and ageing-population funding priorities
+- **Mean trial duration is 35.12 months** (~2 years 11 months), computed from 555,263 valid studies — a 96.9% inclusion rate after date-quality filtering. The export doesn't say whether a completion date is actual or planned, so trials still running count at their planned length. One sample row is not yet recruiting and plans to finish in May 2029. The figure describes registered durations, not achieved ones.
+- **Completed Alzheimer's trials grew from single digits in the 1990s to 61–93 per year through 2009–2018**, then peaked at 139 in 2024. The fall to 106 in 2025 and 6 in 2026 is censoring, since trials finishing then hadn't been marked completed when the data was extracted.
 
 </details>
 
@@ -78,22 +78,26 @@ An end-to-end recommender pipeline on Databricks using **Spark MLlib's Alternati
 1. **EDA in Spark SQL** — quantified the purchase-without-play problem (58,750 of 129,511 purchases), skewness, and sparsity
 2. **Signal design** — chose play-hours over purchases as the preference signal (a purchase without play is awareness, not preference), log-transformed to compress the heavy tail
 3. **ID engineering** — generated integer game IDs with `StringIndexer` rather than relying on an external mapping file
-4. **Baseline → tuned** — implicit-feedback ALS baseline, then an **18-run hyperparameter grid** (rank × regParam × implicitPrefs), every run logged to **MLflow** with parameters, metrics, and artifacts
+4. **Baseline → tuned** — implicit-feedback ALS baseline, then a **36-run hyperparameter grid** (rank 10/20/50 × regParam 0.01/0.1/0.5 × maxIter 10/15 × implicitPrefs on/off), every run logged to **MLflow** with parameters, metrics, and the fitted model
 5. **Qualitative validation** — inspected recommendations for real users against their play histories, not just aggregate metrics
 
 ### Results
 
+RMSE is on log(1 + hours), over an 80/20 random split (56,518 training rows, 13,971 test rows). `coldStartStrategy="drop"` scores only test rows whose user and game appear in training.
+
 | Model | RMSE | Notes |
 | --- | --- | --- |
-| Baseline ALS (implicit, rank=10, reg=0.1) | 2.41 | Confidence-weighted preference model |
-| Best implicit configuration | 2.3973 | Tuning gains marginal in implicit mode |
-| **Best explicit configuration** | **1.4568** | **Log-transformed hours behave like explicit ratings** |
+| Baseline ALS (implicit, rank=10, reg=0.1, 10 iterations) | 2.4055 | Predicts a 0-to-1 preference score, not hours |
+| Best implicit configuration (rank=10, reg=0.01, 15 iterations) | 2.3973 | Same scale, so the same caveat |
+| **Best explicit configuration (rank=50, reg=0.1, 15 iterations)** | **1.4568** | **Predicts log-hours directly** |
 
-### The Interesting Finding
+### What the comparison can and can't say
 
-Play-hours are textbook *implicit* feedback — yet **explicit-mode ALS substantially outperformed implicit mode** (RMSE 1.4568 vs 2.3973). The log transformation converts raw hours into a continuous preference scale that explicit ALS can optimise directly, while implicit mode only treats values as confidence weights on a binary signal. Qualitatively, the explicit model also produced richer, less over-specialised recommendations (the implicit model tunnel-visioned on a single genre for FPS-heavy users). The lesson: **the right ALS mode depends on how the signal is transformed, not just on how the data was collected** — an assumption worth testing, not defaulting.
+Implicit ALS doesn't try to predict hours. It predicts a preference score between about 0 and 1 and uses the hours only as confidence weights. Its RMSE against log-hours mostly measures that difference in scale, which is why the baseline's R² is −1.28. So the RMSE gap between the two modes is not evidence that one recommends better than the other. Within explicit mode the comparison is fair, and there regularisation mattered most. At reg 0.01 RMSE ran from 1.57 to 1.98, and at reg 0.1 or 0.5 every run landed between 1.46 and 1.52. Rank 50 was best in explicit mode, while rank 10 and 20 edged out rank 50 in implicit mode.
 
-Tuning also showed **lower rank wins under extreme sparsity** — rank 10 beat rank 50 consistently, because 99.8% sparsity cannot meaningfully populate 50 latent dimensions.
+The inspection of user 76767 also needs care. `recommendForAllUsers` doesn't remove games a user already owns, so 4 of the explicit model's top 10 and 9 of the implicit model's top 10 were games this user had already played. The implicit model wasn't stuck on one genre so much as handing the user their own library back.
+
+The next step is a ranking evaluation that removes seen games and reports precision@10 and recall@10 for both modes against a most-popular baseline.
 
 </details>
 
